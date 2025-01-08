@@ -1,3 +1,8 @@
+using Application.Commands;
+using Domain.Interfaces;
+using Domain.Models;
+using MediatR;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +12,10 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));
+builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
 
 var app = builder.Build();
 
