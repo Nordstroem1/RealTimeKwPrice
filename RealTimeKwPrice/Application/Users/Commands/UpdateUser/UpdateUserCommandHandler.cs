@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.Commands
 {
-    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, User>
+    public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, OperationResult<User>>
     {
         private readonly IGenericRepository<User> _userRepository;
 
@@ -15,12 +15,12 @@ namespace Application.Commands
             _userRepository = userRepository;
         }
 
-        public async Task<User> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<User>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var existingUser = await _userRepository.GetByIdAsync(request.Id);
             if (existingUser == null)
             {
-                return null;
+                return OperationResult<User>.Fail("User not found", nameof(UpdateUserCommandHandler));
             }
 
             existingUser.UserName = request.User.UserName;
@@ -30,7 +30,8 @@ namespace Application.Commands
             existingUser.Role = request.User.Role;
             existingUser.Location = request.User.Location;
 
-            return await _userRepository.UpdateAsync(existingUser);
+            var updatedUser = await _userRepository.UpdateAsync(existingUser);
+            return OperationResult<User>.Success(updatedUser);
         }
     }
 }

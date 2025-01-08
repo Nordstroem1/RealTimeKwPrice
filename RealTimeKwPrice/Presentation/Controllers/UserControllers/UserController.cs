@@ -21,20 +21,29 @@ namespace API.Controllers.UserControllers
         [SwaggerOperation(Summary = "Update User", Description = "Updates an existing user by ID")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (id != user.Id)
             {
                 return BadRequest("User ID mismatch");
             }
 
             var command = new UpdateUserCommand(id, user);
-            var updatedUser = await _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
-            if (updatedUser == null)
+            if (!result.Succeeded)
             {
-                return NotFound("User not found.");
+                if (result.ErrorMessage == "User not found")
+                {
+                    return NotFound(result.ErrorMessage);
+                }
+                return BadRequest(result.ErrorMessage);
             }
 
-            return Ok(updatedUser);
+            return Ok(result.Data);
         }
     }
 }
