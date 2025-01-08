@@ -1,17 +1,20 @@
+
 using Application.Commands;
 using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
+using Infrastructure.DependencyInjection;
+using Infrastructure.Initializer;
+using Microsoft.AspNetCore.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddInfrastructureLayer(builder.Configuration);
 
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));
@@ -19,7 +22,13 @@ builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+    await RoleInitializer.InitializeAsync(roleManager);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
