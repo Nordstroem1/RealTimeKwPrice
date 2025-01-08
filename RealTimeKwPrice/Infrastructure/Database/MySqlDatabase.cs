@@ -8,7 +8,6 @@ namespace Infrastructure.Database
     public class MySqlDatabase : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
         public MySqlDatabase(DbContextOptions<MySqlDatabase> options) : base(options) { }
-
         public DbSet<ElectricityPrice> ElectricityPrices { get; set; }
         public DbSet<KiloWattPrice> KiloWattPrices { get; set; }
         public DbSet<RoleEnums> RoleEnums { get; set; }
