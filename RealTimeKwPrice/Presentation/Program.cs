@@ -2,9 +2,6 @@
 using Application.Commands;
 using Domain.Interfaces;
 using Domain.Models;
-using MediatR;
-using Infrastructure.DependencyInjection;
-using Infrastructure.Initializer;
 using Microsoft.AspNetCore.Identity;
 
 
