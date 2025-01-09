@@ -8,11 +8,11 @@ namespace API.Controllers.UserControllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    public class UpdateUserController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public UserController(IMediator mediator)
+        public UpdateUserController(IMediator mediator)
         {
             _mediator = mediator;
         }
