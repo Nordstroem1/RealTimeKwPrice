@@ -28,9 +28,31 @@ namespace API.Controllers.UserControllers
                 return BadRequest(ModelState);
             }
 
-            var command = new ChangeUserRoleCommand(changeUserRoleDTO);
-            var result = await _mediator.Send(command);
-            return Ok(result);
+            try
+            {
+                var command = new ChangeUserRoleCommand(changeUserRoleDTO);
+                var operationResult = await _mediator.Send(command);
+
+                if (!operationResult.Succeeded)
+                {
+                    return BadRequest(new
+                    {
+                        operationResult.ErrorMessage,
+                        operationResult.FailLocation
+                    });
+                }
+
+                return Ok(operationResult.Data);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Message = "An unexpected error occurred while processing the request.",
+                    Exception = ex.Message,
+                    StackTrace = ex.StackTrace 
+                });
+            }
         }
     }
 }

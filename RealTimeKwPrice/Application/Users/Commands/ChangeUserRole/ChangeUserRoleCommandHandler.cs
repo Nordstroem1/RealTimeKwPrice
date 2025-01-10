@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Users.Commands.ChangeUserRole
 {
-    public class ChangeUserRoleCommandHandler : IRequest<OperationResult<User>>
+    public class ChangeUserRoleCommandHandler : IRequestHandler<ChangeUserRoleCommand, OperationResult<UserRoleResultDTO>>
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
@@ -21,29 +21,47 @@ namespace Application.Users.Commands.ChangeUserRole
             _roleManager = roleManager;
         }
 
-        public async Task<UserRoleResultDTO> Handle(ChangeUserRoleCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<UserRoleResultDTO>> Handle(ChangeUserRoleCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByIdAsync(request.ChangeUserRoleDTO.UserId.ToString());
-            if (user == null)
+            try
             {
-                throw new ArgumentException("User not found.");
+                var user = await _userManager.FindByIdAsync(request.ChangeUserRoleDTO.UserId.ToString());
+                if (user == null)
+                {
+                    return OperationResult<UserRoleResultDTO>.Fail("User not found.", nameof(Handle));
+                }
+
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (currentRoles.Contains(request.ChangeUserRoleDTO.NewRole))
+                {
+                    return OperationResult<UserRoleResultDTO>.Fail($"User already has the role {request.ChangeUserRoleDTO.NewRole}.", nameof(Handle));
+                }
+
+                var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                if (!removeRolesResult.Succeeded)
+                {
+                    return OperationResult<UserRoleResultDTO>.Fail("Failed to remove current roles.", nameof(Handle));
+                }
+
+                var addRoleResult = await _userManager.AddToRoleAsync(user, request.ChangeUserRoleDTO.NewRole);
+                if (!addRoleResult.Succeeded)
+                {
+                    return OperationResult<UserRoleResultDTO>.Fail("Failed to add new role.", nameof(Handle));
+                }
+
+                var result = new UserRoleResultDTO
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName,
+                    CurrentRole = request.ChangeUserRoleDTO.NewRole
+                };
+
+                return OperationResult<UserRoleResultDTO>.Success(result);
             }
-
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            if (currentRoles.Contains(request.ChangeUserRoleDTO.NewRole))
+            catch (Exception ex)
             {
-                throw new ArgumentException($"User already has the role {request.ChangeUserRoleDTO.NewRole}.");
+                return OperationResult<UserRoleResultDTO>.Fail($"An unexpected error occurred: {ex.Message}", nameof(Handle));
             }
-
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            await _userManager.AddToRoleAsync(user, request.ChangeUserRoleDTO.NewRole);
-
-            return new UserRoleResultDTO
-            {
-                UserId = user.Id,
-                UserName = user.UserName,
-                CurrentRole = request.ChangeUserRoleDTO.NewRole
-            };
         }
     }
 }
