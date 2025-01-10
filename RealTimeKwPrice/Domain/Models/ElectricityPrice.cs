@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
     public class ElectricityPrice
     {
+        public Guid Id { get; set; }
         public decimal SEK_per_kWh { get; set; }
         public decimal EUR_per_kWh { get; set; }
         public decimal EXR { get; set; }
