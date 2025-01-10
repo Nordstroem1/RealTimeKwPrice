@@ -2,10 +2,9 @@
 using Application.Commands;
 using Domain.Interfaces;
 using Domain.Models;
-using Infrastructure.DependencyInjection;
-using Infrastructure.Initializer;
 using Microsoft.AspNetCore.Identity;
 using Infrastructure.Data;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
