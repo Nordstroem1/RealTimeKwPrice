@@ -8,6 +8,7 @@ using Infrastructure.Data;
 using Infrastructure.Initializer;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
