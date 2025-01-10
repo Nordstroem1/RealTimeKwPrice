@@ -3,8 +3,12 @@ using Application.Commands;
 using Domain.Interfaces;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using Infrastructure.DependencyInjection;
 using Infrastructure.Data;
-
+using Infrastructure.Initializer;
+using Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+using Infrastructure.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +17,9 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddInfrastructureLayer(builder.Configuration);
+builder.Services.AddInfrastructureLayer(builder.Configuration,
+    builder.Configuration.GetConnectionString("DefaultConnection")!);
+
 
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));

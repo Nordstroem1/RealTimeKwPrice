@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Domain.Models;
+using Infrastructure.Database;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -8,8 +12,17 @@ namespace Infrastructure.DependencyInjection
 {
     public static class InfrastructureDependencyInjection
     {
-        public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration configuration, string connectionString)
         {
+            services.AddDbContext<MySqlDatabase>(options =>
+            {
+                options.UseSqlServer(connectionString);
+            });
+
+            services.AddIdentity<User, IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<MySqlDatabase>()
+                .AddDefaultTokenProviders();
+
             var jwtSettings = configuration.GetSection("JwtSettings");
             var secretKey = jwtSettings["secret"];
 
