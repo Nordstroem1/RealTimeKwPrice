@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
-namespace Presentation.Controllers
+namespace API.Controllers.PriceController
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -47,4 +47,4 @@ namespace Presentation.Controllers
             }
         }
     }
-    }
+}
