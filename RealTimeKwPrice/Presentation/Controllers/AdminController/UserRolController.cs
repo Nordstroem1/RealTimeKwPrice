@@ -1,4 +1,4 @@
-﻿using Application.DTO;
+﻿using Application.DTO.Role;
 using Application.Users.Commands.ChangeUserRole;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace API.Controllers.UserControllers
+namespace API.Controllers.AdminController
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -50,7 +50,7 @@ namespace API.Controllers.UserControllers
                 {
                     Message = "An unexpected error occurred while processing the request.",
                     Exception = ex.Message,
-                    StackTrace = ex.StackTrace 
+                    ex.StackTrace
                 });
             }
         }
