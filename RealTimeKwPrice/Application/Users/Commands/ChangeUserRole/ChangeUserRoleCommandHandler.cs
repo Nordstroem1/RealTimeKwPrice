@@ -1,13 +1,7 @@
-﻿using Application.DTO;
+﻿using Application.DTO.Role;
 using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Application.Users.Commands.ChangeUserRole
 {
     public class ChangeUserRoleCommandHandler : IRequestHandler<ChangeUserRoleCommand, OperationResult<UserRoleResultDTO>>

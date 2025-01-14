@@ -1,4 +1,4 @@
-﻿using Application.DTOs.User;
+﻿using Application.DTO.User;
 using Domain.Models;
 using MediatR;
 
