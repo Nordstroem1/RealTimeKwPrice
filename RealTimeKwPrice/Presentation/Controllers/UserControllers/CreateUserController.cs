@@ -10,8 +10,8 @@ namespace API.Controllers.UserControllers
     public class CreateUserController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<UserController> _logger;
-        public CreateUserController(IMediator mediator, ILogger<UserController> logger)
+        private readonly ILogger<CreateUserController> _logger;
+        public CreateUserController(IMediator mediator, ILogger<CreateUserController> logger)
         {
             _mediator = mediator;
             _logger = logger;
