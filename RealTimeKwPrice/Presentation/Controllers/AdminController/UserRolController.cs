@@ -1,5 +1,7 @@
 ﻿using Application.DTO.Role;
 using Application.Users.Commands.ChangeUserRole;
+using Domain.Interfaces;
+using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +15,14 @@ namespace API.Controllers.AdminController
     public class UserRolController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<UserRolController> _logger; 
+        private readonly ILoggerRepository _loggerToDatabase; 
 
-        public UserRolController(IMediator mediator)
+        public UserRolController(IMediator mediator, ILogger<UserRolController> logger, ILoggerRepository loggerToDatabase)
         {
             _mediator = mediator;
+            _logger = logger;
+            _loggerToDatabase = loggerToDatabase;
         }
 
         [Authorize(Policy = "Admin")]
@@ -25,6 +31,18 @@ namespace API.Controllers.AdminController
         {
             if (!ModelState.IsValid)
             {
+                var errorMessage = "Invalid model state for changing user role.";
+
+                await _loggerToDatabase.LogErrorAsync(new Logger
+                {
+                    Location = nameof(UserRolController),
+                    WhatWentWrong = errorMessage,
+                    TimeStamp = DateTime.UtcNow,
+                    Function = nameof(ChangeUserRole)
+                });
+
+                _logger.LogWarning(errorMessage);
+
                 return BadRequest(ModelState);
             }
 
@@ -35,6 +53,18 @@ namespace API.Controllers.AdminController
 
                 if (!operationResult.Succeeded)
                 {
+                    var errorMessage = "Failed to change user role.";
+
+                    await _loggerToDatabase.LogErrorAsync(new Logger
+                    {
+                        Location = nameof(UserRolController),
+                        WhatWentWrong = errorMessage,
+                        TimeStamp = DateTime.UtcNow,
+                        Function = nameof(ChangeUserRole)
+                    });
+
+                    _logger.LogError(errorMessage);
+
                     return BadRequest(new
                     {
                         operationResult.ErrorMessage,
@@ -46,6 +76,18 @@ namespace API.Controllers.AdminController
             }
             catch (Exception ex)
             {
+                var errorMessage = $"An unexpected error occurred while processing the request: {ex.Message}";
+
+                await _loggerToDatabase.LogErrorAsync(new Logger
+                {
+                    Location = nameof(UserRolController),
+                    WhatWentWrong = errorMessage,
+                    TimeStamp = DateTime.UtcNow,
+                    Function = nameof(ChangeUserRole)
+                });
+
+                _logger.LogError(errorMessage);
+
                 return StatusCode(500, new
                 {
                     Message = "An unexpected error occurred while processing the request.",

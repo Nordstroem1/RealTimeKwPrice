@@ -1,4 +1,6 @@
-﻿using Domain.Models;
+﻿using Domain.Interfaces;
+using Domain.Models;
+using Infrastructure.Data;
 using Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -63,6 +65,8 @@ namespace Infrastructure.DependencyInjection
                     policy.RequireAuthenticatedUser();
                 });
             });
+
+            services.AddScoped<ILoggerRepository, LoggerRepository>();
 
             return services;
         }
