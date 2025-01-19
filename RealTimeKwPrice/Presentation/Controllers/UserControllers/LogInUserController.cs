@@ -43,11 +43,20 @@ namespace API.Controllers.UserControllers
                 }
 
                 _logger.LogInformation("User {UserName} logged in successfully", loginQuery.UserName);
+
+                var (user, token) = result.Data;
+
                 return Ok(new
                 {
                     Message = "Login successful",
-                    UserId = result.Data.Id,
-                    UserName = result.Data.UserName
+                    User = new
+                    {
+                        user.Id,
+                        user.UserName,
+                        user.Email,
+                        user.Role
+                    },
+                    Token = token
                 });
             }
             catch (Exception ex)
