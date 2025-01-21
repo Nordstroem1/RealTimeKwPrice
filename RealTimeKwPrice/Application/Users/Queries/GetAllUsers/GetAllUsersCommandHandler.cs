@@ -11,12 +11,15 @@ namespace Application.Users.Queries.GetAllUsers
         private readonly IGenericRepository<User> _userRepository;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<GetAllUsersCommandHandler> _logger;
+        private readonly ILoggerRepository _loggerToDatabse;
 
-        public GetAllUsersCommandHandler(IGenericRepository<User> userRepository, UserManager<User> userManager, ILogger<GetAllUsersCommandHandler> logger)
+
+        public GetAllUsersCommandHandler(IGenericRepository<User> userRepository, UserManager<User> userManager, ILogger<GetAllUsersCommandHandler> logger, ILoggerRepository loggerToDatabse)
         {
             _userRepository = userRepository;
             _userManager = userManager;
             _logger = logger;
+            _loggerToDatabse = loggerToDatabse;
         }
 
         public async Task<OperationResult<List<User>>> Handle(GetAllUsersCommand request, CancellationToken cancellationToken)
@@ -27,6 +30,15 @@ namespace Application.Users.Queries.GetAllUsers
                 if (users == null || !users.Any())
                 {
                     _logger.LogWarning("No users found");
+
+                    await _loggerToDatabse.LogErrorAsync(new Logger
+                    {
+                        Location = nameof(GetAllUsersCommandHandler),
+                        WhatWentWrong = "No users found",
+                        TimeStamp = DateTime.UtcNow,
+                        Function = nameof(Handle)
+                    });
+
                     return OperationResult<List<User>>.Fail("No users found", nameof(GetAllUsersCommandHandler));
                 }
 
@@ -36,6 +48,15 @@ namespace Application.Users.Queries.GetAllUsers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while retrieving users");
+
+                await _loggerToDatabse.LogErrorAsync(new Logger
+                {
+                    Location = nameof(GetAllUsersCommandHandler),
+                    WhatWentWrong = ex.Message,
+                    TimeStamp = DateTime.UtcNow,
+                    Function = nameof(Handle)
+                });
+
                 return OperationResult<List<User>>.Fail("An error occurred while retrieving users", nameof(GetAllUsersCommandHandler));
             }
         }
