@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Application.DataValidation.ExplicitWordList;
+using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -11,12 +12,14 @@ namespace Application.Users.Commands.CreateUser
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
         private readonly ILoggerRepository _loggerToDatabse;
+        private readonly CheckForExplicitWord _checkForExplicitWord;
 
-        public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse)
+        public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse, CheckForExplicitWord checkForExplicitWord)
         {
             _userManager = userManager;
             _logger = logger;
             _loggerToDatabse = loggerToDatabse;
+            _checkForExplicitWord = checkForExplicitWord;
         }
 
         public async Task<OperationResult<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -35,22 +38,27 @@ namespace Application.Users.Commands.CreateUser
                     PriceList = request.UserDto.PriceList
                 };
 
-                var userCreationResult = await _userManager.CreateAsync(createdUser, request.UserDto.Password);
+                var checkForBadWordsResult = _checkForExplicitWord.CheckForBadWords(createdUser.UserName);
 
-                if (!userCreationResult.Succeeded)
+                if (checkForBadWordsResult.Succeeded)
                 {
-                    var errors = string.Join(", ", userCreationResult.Errors.Select(e => e.Description));
-                    _logger.LogError($"Error when creating a user: {errors}");
+                    var userCreationResult = await _userManager.CreateAsync(createdUser, request.UserDto.Password);
 
-                    await _loggerToDatabse.LogErrorAsync(new Logger
+                    if (!userCreationResult.Succeeded)
                     {
-                        Location = nameof(CreateUserCommandHandler),
-                        WhatWentWrong = errors,
-                        TimeStamp = DateTime.UtcNow,
-                        Function = nameof(Handle)
-                    });
+                        var errors = string.Join(", ", userCreationResult.Errors.Select(e => e.Description));
+                        _logger.LogError($"Error when creating a user: {errors}");
 
-                    return OperationResult<User>.Fail($"Failed to create user: {errors}", "Application");
+                        await _loggerToDatabse.LogErrorAsync(new Logger
+                        {
+                            Location = nameof(CreateUserCommandHandler),
+                            WhatWentWrong = errors,
+                            TimeStamp = DateTime.UtcNow,
+                            Function = nameof(Handle)
+                        });
+
+                        return OperationResult<User>.Fail($"Failed to create user: {errors}", "Application");
+                    }
                 }
 
                 var roleResult = await _userManager.AddToRoleAsync(createdUser, createdUser.Role.ToString());
