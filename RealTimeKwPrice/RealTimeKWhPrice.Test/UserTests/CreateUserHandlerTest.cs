@@ -1,5 +1,4 @@
-﻿
-using Application.DTOs.User;
+﻿using Application.DTO.User;
 using Application.Users.Commands.CreateUser;
 using Domain.Models;
 using FakeItEasy;
@@ -8,13 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace RealTimeKWhPrice.Test.UserTests
 {
-    public class UserTest 
+    public class CreateUserHandlerTest 
     {
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
         private readonly CreateUserCommandHandler _handler;
 
-        public UserTest()
+        public CreateUserHandlerTest()
         {
             _userManager = A.Fake<UserManager<User>>();
             _logger = A.Fake<ILogger<CreateUserCommandHandler>>();
