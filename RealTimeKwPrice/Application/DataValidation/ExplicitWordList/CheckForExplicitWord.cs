@@ -35,7 +35,7 @@ namespace Application.DataValidation.ExplicitWordList
 
                 foreach (var word in explicitWordsList)
                 {
-                    if (userName.Contains(word.ToLower()))
+                    if (userName.ToLower().Contains(word.ToLower()))
                     {
                         return OperationResult<bool>.Fail("Explicit word found", "ExplicitWordList");
                     }

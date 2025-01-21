@@ -10,7 +10,7 @@ namespace RealTimeKWhPrice.Test.DataValidationTests
         {
             //Arrange 
             var basePath = AppContext.BaseDirectory;
-            var jsonFilePath = Path.Combine(basePath, "ExplicitWordsJson", "explicitWords.json");
+            var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
             var checkForExplicitWord = new CheckForExplicitWord(jsonFilePath);
             var userName = "JohnIdiotDoe";
 
