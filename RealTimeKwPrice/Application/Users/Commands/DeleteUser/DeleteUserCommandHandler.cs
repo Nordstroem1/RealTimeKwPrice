@@ -47,12 +47,12 @@ namespace Application.Users.Commands.DeleteUser
                 var existingUser = await _userManager.FindByIdAsync(userId.ToString());
                 if (existingUser == null)
                 {
-                    _logger.LogWarning("User with ID {UserId} not found", request.Id);
+                    _logger.LogWarning("User with ID {UserId} not found", userId);
 
                     await _loggerToDatabse.LogErrorAsync(new Logger
                     {
                         Location = nameof(DeleteUserCommandHandler),
-                        WhatWentWrong = $"User with ID {request.Id} not found",
+                        WhatWentWrong = $"User with ID {userId} not found",
                         TimeStamp = DateTime.UtcNow,
                         Function = nameof(Handle)
                     });
@@ -64,12 +64,12 @@ namespace Application.Users.Commands.DeleteUser
                 var result = await _userManager.DeleteAsync(existingUser);
                 if (!result.Succeeded)
                 {
-                    _logger.LogError("Failed to delete user with ID {UserId}", request.Id);
+                    _logger.LogError("Failed to delete user with ID {UserId}", userId);
 
                     await _loggerToDatabse.LogErrorAsync(new Logger
                     {
                         Location = nameof(DeleteUserCommandHandler),
-                        WhatWentWrong = $"Failed to delete user with ID {request.Id}",
+                        WhatWentWrong = $"Failed to delete user with ID {userId}",
                         TimeStamp = DateTime.UtcNow,
                         Function = nameof(Handle)
                     });
@@ -83,7 +83,7 @@ namespace Application.Users.Commands.DeleteUser
             catch (Exception ex)
             {
 
-                _logger.LogError(ex, "An error occurred while deleting user with ID {UserId}", request.Id);
+                _logger.LogError(ex, "An error occurred while deleting user with ID {UserId}", userId);
 
                 await _loggerToDatabse.LogErrorAsync(new Logger
                 {
