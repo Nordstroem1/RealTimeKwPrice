@@ -40,25 +40,27 @@ namespace Application.Users.Commands.CreateUser
 
                 var checkForBadWordsResult = _checkForExplicitWord.CheckForBadWords(createdUser.UserName);
 
-                if (checkForBadWordsResult.Succeeded)
+                if (checkForBadWordsResult.Succeeded == false)
                 {
-                    var userCreationResult = await _userManager.CreateAsync(createdUser, request.UserDto.Password);
+                    return OperationResult<User>.Fail(checkForBadWordsResult.ErrorMessage, "Application");
+                }
 
-                    if (!userCreationResult.Succeeded)
+                var userCreationResult = await _userManager.CreateAsync(createdUser, request.UserDto.Password);
+
+                if (!userCreationResult.Succeeded)
+                {
+                    var errors = string.Join(", ", userCreationResult.Errors.Select(e => e.Description));
+                    _logger.LogError($"Error when creating a user: {errors}");
+
+                    await _loggerToDatabse.LogErrorAsync(new Logger
                     {
-                        var errors = string.Join(", ", userCreationResult.Errors.Select(e => e.Description));
-                        _logger.LogError($"Error when creating a user: {errors}");
+                        Location = nameof(CreateUserCommandHandler),
+                        WhatWentWrong = errors,
+                        TimeStamp = DateTime.UtcNow,
+                        Function = nameof(Handle)
+                    });
 
-                        await _loggerToDatabse.LogErrorAsync(new Logger
-                        {
-                            Location = nameof(CreateUserCommandHandler),
-                            WhatWentWrong = errors,
-                            TimeStamp = DateTime.UtcNow,
-                            Function = nameof(Handle)
-                        });
-
-                        return OperationResult<User>.Fail($"Failed to create user: {errors}", "Application");
-                    }
+                    return OperationResult<User>.Fail($"Failed to create user: {errors}", "Application");
                 }
 
                 var roleResult = await _userManager.AddToRoleAsync(createdUser, createdUser.Role.ToString());
