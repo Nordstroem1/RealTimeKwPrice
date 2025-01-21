@@ -1,4 +1,6 @@
-﻿using Domain.Models;
+﻿using Domain.Interfaces;
+using Domain.Models;
+using Infrastructure.Data;
 using Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +21,15 @@ namespace Infrastructure.DependencyInjection
                 options.UseSqlServer(connectionString);
             });
 
-            services.AddIdentity<User, IdentityRole<Guid>>()
+            services.AddIdentity<User, IdentityRole<Guid>>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 1;
+            })
                 .AddEntityFrameworkStores<MySqlDatabase>()
                 .AddDefaultTokenProviders();
 
@@ -63,6 +73,8 @@ namespace Infrastructure.DependencyInjection
                     policy.RequireAuthenticatedUser();
                 });
             });
+
+            services.AddScoped<ILoggerRepository, LoggerRepository>();
 
             return services;
         }

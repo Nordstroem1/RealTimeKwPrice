@@ -14,14 +14,17 @@ namespace Application.Commands
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly ILogger<UpdateUserCommandHandler> _logger;
+        private readonly ILoggerRepository _loggerToDatabse;
+
 
         public UpdateUserCommandHandler(IGenericRepository<User> userRepository,
-            RoleManager<IdentityRole<Guid>> roleManager, UserManager<User> userManager, ILogger<UpdateUserCommandHandler> logger)
+            RoleManager<IdentityRole<Guid>> roleManager, UserManager<User> userManager, ILogger<UpdateUserCommandHandler> logger, ILoggerRepository loggerToDatabse)
         {
             _userRepository = userRepository;
             _roleManager = roleManager;
             _userManager = userManager;
             _logger = logger;
+            _loggerToDatabse = loggerToDatabse;
         }
 
         public async Task<OperationResult<User>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -32,6 +35,15 @@ namespace Application.Commands
                 if (existingUser == null)
                 {
                     _logger.LogWarning("User with ID {UserId} not found", request.Id);
+
+                    await _loggerToDatabse.LogErrorAsync(new Logger
+                    {
+                        Location = nameof(UpdateUserCommandHandler),
+                        WhatWentWrong = $"User with ID {request.Id} not found",
+                        TimeStamp = DateTime.UtcNow,
+                        Function = nameof(Handle)
+                    });
+
                     return OperationResult<User>.Fail("User not found", nameof(UpdateUserCommandHandler));
                 }
 
@@ -53,6 +65,16 @@ namespace Application.Commands
                 if (!result.Succeeded)
                 {
                     _logger.LogError("Failed to update user with ID {UserId}", request.Id);
+
+                    await _loggerToDatabse.LogErrorAsync(new Logger
+                    {
+                        Location = nameof(UpdateUserCommandHandler),
+                        WhatWentWrong = $"Failed to update user with ID {request.Id}",
+                        TimeStamp = DateTime.UtcNow,
+                        Function = nameof(Handle)
+                    });
+
+
                     return OperationResult<User>.Fail("Failed to update user", nameof(UpdateUserCommandHandler));
                 }
 
@@ -62,6 +84,15 @@ namespace Application.Commands
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while updating user with ID {UserId}", request.Id);
+
+                await _loggerToDatabse.LogErrorAsync(new Logger
+                {
+                    Location = nameof(UpdateUserCommandHandler),
+                    WhatWentWrong = ex.Message,
+                    TimeStamp = DateTime.UtcNow,
+                    Function = nameof(Handle)
+                });
+
                 return OperationResult<User>.Fail("An error occurred while updating the user", nameof(UpdateUserCommandHandler));
             }
         }
