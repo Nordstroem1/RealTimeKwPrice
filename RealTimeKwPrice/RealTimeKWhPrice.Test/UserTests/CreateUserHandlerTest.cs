@@ -1,5 +1,7 @@
-﻿using Application.DTO.User;
+﻿using Application.DataValidation.ExplicitWordList;
+using Application.DTO.User;
 using Application.Users.Commands.CreateUser;
+using Domain.Interfaces;
 using Domain.Models;
 using FakeItEasy;
 using Microsoft.AspNetCore.Identity;
@@ -12,12 +14,14 @@ namespace RealTimeKWhPrice.Test.UserTests
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
         private readonly CreateUserCommandHandler _handler;
-
+        private readonly ILoggerRepository _loggerToDatabase;
+        private readonly CheckForExplicitWord _checkForExplicitWord;
         public CreateUserHandlerTest()
         {
             _userManager = A.Fake<UserManager<User>>();
             _logger = A.Fake<ILogger<CreateUserCommandHandler>>();
-            _handler = new CreateUserCommandHandler(_userManager, _logger);
+            _loggerToDatabase = A.Fake<ILoggerRepository>();
+            _handler = new CreateUserCommandHandler(_userManager, _logger, _loggerToDatabase,_checkForExplicitWord);
         }
 
         [Fact]

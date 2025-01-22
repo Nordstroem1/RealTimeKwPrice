@@ -1,4 +1,5 @@
-﻿using Domain.Interfaces;
+﻿using Application.DataValidation.ExplicitWordList;
+using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -11,12 +12,14 @@ namespace Application.Users.Commands.CreateUser
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
         private readonly ILoggerRepository _loggerToDatabse;
+        private readonly CheckForExplicitWord _checkForExplicitWord;
 
-        public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse)
+        public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse, CheckForExplicitWord checkForExplicitWord)
         {
             _userManager = userManager;
             _logger = logger;
             _loggerToDatabse = loggerToDatabse;
+            _checkForExplicitWord = checkForExplicitWord;
         }
 
         public async Task<OperationResult<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -34,6 +37,13 @@ namespace Application.Users.Commands.CreateUser
                     Location = request.UserDto.Location,
                     PriceList = request.UserDto.PriceList
                 };
+
+                var checkForBadWordsResult = _checkForExplicitWord.CheckForBadWords(createdUser.UserName);
+
+                if (checkForBadWordsResult.Succeeded == false)
+                {
+                    return OperationResult<User>.Fail(checkForBadWordsResult.ErrorMessage, "Application");
+                }
 
                 var userCreationResult = await _userManager.CreateAsync(createdUser, request.UserDto.Password);
 
