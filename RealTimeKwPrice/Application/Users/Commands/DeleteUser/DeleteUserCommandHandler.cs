@@ -6,13 +6,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Application.Users.Commands.DeleteUserAsAdmin;
 
 namespace Application.Users.Commands.DeleteUser
 {
     public class DeleteUserCommandHandler :
-        IRequestHandler<DeleteUserCommand, OperationResult<User>>,
-        IRequestHandler<DeleteUserAsAdminCommand, OperationResult<User>>
+        IRequestHandler<DeleteUserCommand, OperationResult<User>>
     {
         private readonly IGenericRepository<User> _userRepository;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
@@ -35,10 +33,6 @@ namespace Application.Users.Commands.DeleteUser
             return await HandleDeleteUser(request.Id);
         }
 
-        public async Task<OperationResult<User>> Handle(DeleteUserAsAdminCommand request, CancellationToken cancellationToken)
-        {
-            return await HandleDeleteUser(request.Id);
-        }
 
         private async Task<OperationResult<User>> HandleDeleteUser(Guid userId)
         {
