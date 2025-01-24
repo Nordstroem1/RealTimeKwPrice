@@ -8,5 +8,13 @@ namespace Application.DTO.Role
         public Guid UserId { get; set; }
         [Required]
         public string NewRole { get; set; }
+
+        public ChangeUserRoleDTO(Guid userId, string newRole)
+        {
+            UserId = userId;
+            NewRole = newRole;
+        }
     }
+
+
 }
