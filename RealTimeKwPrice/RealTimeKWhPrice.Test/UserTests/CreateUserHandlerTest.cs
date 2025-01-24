@@ -13,15 +13,14 @@ namespace RealTimeKWhPrice.Test.UserTests
     {
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
-        private readonly CreateUserCommandHandler _handler;
+        private CreateUserCommandHandler _handler;
         private readonly ILoggerRepository _loggerToDatabase;
-        private readonly CheckForExplicitWord _checkForExplicitWord;
         public CreateUserHandlerTest()
         {
             _userManager = A.Fake<UserManager<User>>();
             _logger = A.Fake<ILogger<CreateUserCommandHandler>>();
             _loggerToDatabase = A.Fake<ILoggerRepository>();
-            _handler = new CreateUserCommandHandler(_userManager, _logger, _loggerToDatabase,_checkForExplicitWord);
+            _handler = new CreateUserCommandHandler(_userManager, _logger, _loggerToDatabase);
         }
 
         [Fact]
@@ -29,6 +28,12 @@ namespace RealTimeKWhPrice.Test.UserTests
         public async Task CreateUser_WithValidData_ShouldReturnUser()
         {
             // Arrange
+            var basePath = AppContext.BaseDirectory;
+            var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
+            CheckForExplicitWord checkForExplicitWord = new CheckForExplicitWord(jsonFilePath);
+            
+            _handler = new CreateUserCommandHandler(_userManager, _logger, _loggerToDatabase);
+            
             var userDto = new CreateUserDto(
                 userName: "User",
                 email: "User@hotmail.com",
@@ -83,6 +88,10 @@ namespace RealTimeKWhPrice.Test.UserTests
                 Location = userDto.Location,
                 PriceList = userDto.PriceList
             };
+            var basePath = AppContext.BaseDirectory;
+            var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
+            CheckForExplicitWord checkForExplicitWord = new CheckForExplicitWord(jsonFilePath);
+
 
             A.CallTo(() => _userManager.CreateAsync(A<User>._, A<string>._))
                 .Returns(Task.FromResult(IdentityResult.Failed()));
