@@ -12,14 +12,12 @@ namespace Application.Users.Commands.CreateUser
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
         private readonly ILoggerRepository _loggerToDatabse;
-        private readonly CheckForExplicitWord _checkForExplicitWord;
 
-        public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse, CheckForExplicitWord checkForExplicitWord)
+        public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse)
         {
             _userManager = userManager;
             _logger = logger;
             _loggerToDatabse = loggerToDatabse;
-            _checkForExplicitWord = checkForExplicitWord;
         }
 
         public async Task<OperationResult<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -37,7 +35,10 @@ namespace Application.Users.Commands.CreateUser
                     Location = request.UserDto.Location,
                     PriceList = request.UserDto.PriceList
                 };
-
+                var basePath = AppContext.BaseDirectory;
+                var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
+                CheckForExplicitWord _checkForExplicitWord = new CheckForExplicitWord(jsonFilePath);
+              
                 var checkForBadWordsResult = _checkForExplicitWord.CheckForBadWords(createdUser.UserName);
 
                 if (checkForBadWordsResult.Succeeded == false)

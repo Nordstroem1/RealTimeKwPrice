@@ -8,7 +8,8 @@ namespace Application.DataValidation.ExplicitWordList
         private readonly string _jsonFilePath;
         public CheckForExplicitWord(string jsonFilePath)
         {
-            _jsonFilePath = jsonFilePath;
+            _jsonFilePath = Path.GetFullPath(jsonFilePath);
+
         }
         public OperationResult<bool> CheckForBadWords(string userName)
         {
@@ -17,15 +18,12 @@ namespace Application.DataValidation.ExplicitWordList
                 List<string> ExplicitWords = new List<string>();
                 if (string.IsNullOrEmpty(userName)) return OperationResult<bool>.Fail("The input was null or empty.", "ExplicitWordList");
 
-                var basePath = AppContext.BaseDirectory;
-                var totalFilePath = Path.Combine(basePath, _jsonFilePath);
-                
-                if (!File.Exists(totalFilePath))
+                if (!File.Exists(_jsonFilePath))
                 {
-                    return OperationResult<bool>.Fail($"File not found: {totalFilePath}", "ExplicitWordList");
+                    return OperationResult<bool>.Fail($"File not found: {_jsonFilePath}", "ExplicitWordList");
                 }
 
-                var jsonContent = File.ReadAllText(totalFilePath);
+                var jsonContent = File.ReadAllText(_jsonFilePath);
                 var explicitWordsList = JsonConvert.DeserializeObject<List<string>>(jsonContent);
                 
                 if (explicitWordsList == null)
