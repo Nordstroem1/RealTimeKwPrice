@@ -2,6 +2,7 @@
 using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace API.Controllers.PriceController
 {
@@ -10,8 +11,8 @@ namespace API.Controllers.PriceController
     public class ElectricityPriceController : ControllerBase
     {
         private readonly HttpClient _httpClient;
-        private readonly ILogger<ElectricityPriceController> _logger; 
-        private readonly ILoggerRepository _loggerToDatabase; 
+        private readonly ILogger<ElectricityPriceController> _logger;
+        private readonly ILoggerRepository _loggerToDatabase;
 
         public ElectricityPriceController(HttpClient httpClient, ILogger<ElectricityPriceController> logger, ILoggerRepository loggerToDatabase)
         {
@@ -67,7 +68,13 @@ namespace API.Controllers.PriceController
 
             try
             {
-                var data = JsonSerializer.Deserialize<List<ElectricityPrice>>(content);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    NumberHandling = JsonNumberHandling.AllowReadingFromString
+                };
+
+                var data = JsonSerializer.Deserialize<List<ElectricityPrice>>(content, options);
                 return Ok(data);
             }
             catch (JsonException ex)

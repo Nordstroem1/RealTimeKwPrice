@@ -9,41 +9,56 @@ using Infrastructure.Initializer;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Data;
+using Application.TokenHelper;
+using Application.DataValidation.ExplicitWordList;
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-builder.Services.AddHttpClient();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddInfrastructureLayer(builder.Configuration,
-    builder.Configuration.GetConnectionString("DefaultConnection")!);
-
-
-// Register MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));
-builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
-
-var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
+namespace Presentation
 {
-    var services = scope.ServiceProvider;
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    await RoleInitializer.InitializeAsync(roleManager);
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
+
+
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddControllers();
+            builder.Services.AddHttpClient();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddInfrastructureLayer(builder.Configuration,
+                builder.Configuration.GetConnectionString("DefaultConnection")!);
+
+
+            // Register MediatR
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));
+            builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
+
+            builder.Services.AddTransient<TokenHelper>();
+            builder.Services.AddTransient<CheckForExplicitWord>(provider => new CheckForExplicitWord("path/to/explicitWords.json"));
+
+            var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+                await RoleInitializer.InitializeAsync(roleManager);
+            }
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.UseAuthorization();
+
+            app.MapControllers();
+
+            app.Run();
+        }
+    }
 }
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
