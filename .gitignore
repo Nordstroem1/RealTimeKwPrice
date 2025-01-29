@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 Presentation/appsettings.Development.json
+/RealTimeKwPrice/Presentation/appsettings.json
