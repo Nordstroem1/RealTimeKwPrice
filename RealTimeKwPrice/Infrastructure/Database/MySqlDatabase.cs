@@ -12,6 +12,14 @@ namespace Infrastructure.Database
         public DbSet<User> Users { get; set; }
         public DbSet<Logger> Loggers { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("YourConnectionString",
+                    b => b.MigrationsAssembly("Infrastructure"));
+            }
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

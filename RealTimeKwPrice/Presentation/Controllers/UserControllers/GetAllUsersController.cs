@@ -2,6 +2,7 @@
 using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.UserControllers
@@ -21,6 +22,7 @@ namespace API.Controllers.UserControllers
             _loggerToDatabase = loggerToDatabase;
         }
 
+        [Authorize(Policy = "User")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {

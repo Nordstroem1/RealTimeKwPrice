@@ -2,6 +2,7 @@
 using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,6 +25,7 @@ namespace API.Controllers.UserControllers
             _loggerToDatabase = loggerToDatabase;
         }
 
+        [Authorize(Policy = "User")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {

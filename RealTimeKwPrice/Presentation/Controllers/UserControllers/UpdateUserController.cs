@@ -3,10 +3,8 @@ using Domain.Models;
 using MediatR;
 using Swashbuckle.AspNetCore.Annotations;
 using Application.Commands;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers.UserControllers
 {
@@ -24,7 +22,7 @@ namespace API.Controllers.UserControllers
             _logger = logger;
             _loggerToDatabase = loggerToDatabase;
         }
-
+        [Authorize(Policy = "User")]
         [HttpPut("{id}", Name = "UpdateUser")]
         [SwaggerOperation(Summary = "Update User", Description = "Updates an existing user by ID")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
