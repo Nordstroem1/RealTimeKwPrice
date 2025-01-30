@@ -1,4 +1,5 @@
 ﻿using Application.DataValidation.ExplicitWordList;
+using Application.DataValidation.DataSanitizer;
 using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
@@ -12,33 +13,59 @@ namespace Application.Users.Commands.CreateUser
         private readonly UserManager<User> _userManager;
         private readonly ILogger<CreateUserCommandHandler> _logger;
         private readonly ILoggerRepository _loggerToDatabse;
+        private readonly DataSanitizerLogic _dataSanitizerLogic;
 
         public CreateUserCommandHandler(UserManager<User> userManager, ILogger<CreateUserCommandHandler> logger, ILoggerRepository loggerToDatabse)
         {
             _userManager = userManager;
             _logger = logger;
             _loggerToDatabse = loggerToDatabse;
+            _dataSanitizerLogic = new DataSanitizerLogic();
         }
 
         public async Task<OperationResult<User>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             try
             {
+                var (isUserNameValid, sanitizedUserName) = _dataSanitizerLogic.ValidateAndSanitize(request.UserDto.UserName);
+                var (isEmailValid, sanitizedEmail) = _dataSanitizerLogic.ValidateAndSanitize(request.UserDto.Email);
+                var (isPhoneNumberValid, sanitizedPhoneNumber) = _dataSanitizerLogic.ValidateAndSanitize(request.UserDto.PhoneNumber);
+
+                _logger.LogInformation($"Sanitized UserName: {sanitizedUserName}");
+                _logger.LogInformation($"Sanitized Email: {sanitizedEmail}");
+                _logger.LogInformation($"Sanitized PhoneNumber: {sanitizedPhoneNumber}");
+
+                if (!isUserNameValid)
+                {
+                    return OperationResult<User>.Fail("UserName contains forbidden words.", "Application");
+                }
+
+                if (!isEmailValid)
+                {
+                    return OperationResult<User>.Fail("Email contains forbidden words.", "Application");
+                }
+
+                if (!isPhoneNumberValid)
+                {
+                    return OperationResult<User>.Fail("Phone number contains forbidden words.", "Application");
+                }
+
                 var createdUser = new User
                 {
                     Id = Guid.NewGuid(),
-                    UserName = request.UserDto.UserName,
-                    Email = request.UserDto.Email,
-                    PhoneNumber = request.UserDto.PhoneNumber,
+                    UserName = sanitizedUserName,
+                    Email = sanitizedEmail,       
+                    PhoneNumber = sanitizedPhoneNumber, 
                     CreatedAt = request.UserDto.CreatedAt,
                     Role = request.UserDto.Role,
                     Location = request.UserDto.Location,
                     PriceList = request.UserDto.PriceList
                 };
+
                 var basePath = AppContext.BaseDirectory;
                 var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
                 CheckForExplicitWord _checkForExplicitWord = new CheckForExplicitWord(jsonFilePath);
-              
+
                 var checkForBadWordsResult = _checkForExplicitWord.CheckForBadWords(createdUser.UserName);
 
                 if (checkForBadWordsResult.Succeeded == false)
