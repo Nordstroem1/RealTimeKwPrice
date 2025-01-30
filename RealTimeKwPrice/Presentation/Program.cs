@@ -29,12 +29,13 @@ namespace Presentation
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(
-                    name: "LocalHostReactApp",
+                    name: "REALTIMEKWPRICEFE",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
-                    }
-                    );
+                        builder.AllowAnyOrigin()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
             });
 
 
@@ -46,7 +47,7 @@ namespace Presentation
             builder.Services.AddTransient<CheckForExplicitWord>(provider => new CheckForExplicitWord("path/to/explicitWords.json"));
 
             var app = builder.Build();
-            app.UseCors("LocalHostReactApp");
+            app.UseCors("REALTIMEKWPRICEFE");
 
             using (var scope = app.Services.CreateScope())
             {
