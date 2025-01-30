@@ -17,11 +17,8 @@ namespace Application.DTO.User
         [Required]
         public string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-        public RoleEnums.Roles Role { get; set; } = RoleEnums.Roles.User;
-
         [Required]
         public string Location { get; set; }
-        public List<ElectricityPrice> PriceList { get; set; } = new List<ElectricityPrice>();
         public CreateUserDto(string userName, string email, string password, string phoneNumber, string location)
         {
             UserName = userName;

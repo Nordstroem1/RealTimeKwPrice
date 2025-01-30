@@ -48,9 +48,9 @@ namespace RealTimeKWhPrice.Test.UserTests
                 Email = userDto.Email,
                 PhoneNumber = userDto.PhoneNumber,
                 CreatedAt = userDto.CreatedAt,
-                Role = userDto.Role,
+                Role = RoleEnums.Roles.User,
                 Location = userDto.Location,
-                PriceList = userDto.PriceList
+                PriceList = new List<ElectricityPrice> { }
             };
             A.CallTo(() => _userManager.CreateAsync(A<User>._, A<string>._))
                 .Returns(Task.FromResult(IdentityResult.Success));
@@ -84,9 +84,9 @@ namespace RealTimeKWhPrice.Test.UserTests
                 Email = userDto.Email,
                 PhoneNumber = userDto.PhoneNumber,
                 CreatedAt = userDto.CreatedAt,
-                Role = userDto.Role,
+                Role = RoleEnums.Roles.User,
                 Location = userDto.Location,
-                PriceList = userDto.PriceList
+                PriceList = new List<ElectricityPrice> { }
             };
             var basePath = AppContext.BaseDirectory;
             var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
