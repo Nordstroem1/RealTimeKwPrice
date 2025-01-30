@@ -1,4 +1,3 @@
-
 using Application.Commands;
 using Domain.Interfaces;
 using Domain.Models;
@@ -6,9 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Infrastructure.DependencyInjection;
 using Infrastructure.Data;
 using Infrastructure.Initializer;
-using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.Data;
 using Application.TokenHelper;
 using Application.DataValidation.ExplicitWordList;
 
@@ -28,6 +25,17 @@ namespace Presentation
             builder.Services.AddSwaggerGen();
             builder.Services.AddInfrastructureLayer(builder.Configuration,
                 builder.Configuration.GetConnectionString("DefaultConnection")!);
+            
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    name: "LocalHostReactApp",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+                    }
+                    );
+            });
 
 
             // Register MediatR
@@ -38,6 +46,7 @@ namespace Presentation
             builder.Services.AddTransient<CheckForExplicitWord>(provider => new CheckForExplicitWord("path/to/explicitWords.json"));
 
             var app = builder.Build();
+            app.UseCors("LocalHostReactApp");
 
             using (var scope = app.Services.CreateScope())
             {
