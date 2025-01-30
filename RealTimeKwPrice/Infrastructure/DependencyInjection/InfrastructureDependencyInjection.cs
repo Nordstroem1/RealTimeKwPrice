@@ -18,7 +18,8 @@ namespace Infrastructure.DependencyInjection
         {
             services.AddDbContext<MySqlDatabase>(options =>
             {
-                options.UseSqlServer(connectionString);
+                options.UseSqlServer(connectionString,
+                b => b.MigrationsAssembly("Infrastructure"));
             });
 
             services.AddIdentity<User, IdentityRole<Guid>>(options =>
