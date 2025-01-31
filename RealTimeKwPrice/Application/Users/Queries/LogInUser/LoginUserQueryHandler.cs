@@ -28,29 +28,29 @@ namespace Application.Users.Queries.LogInUser
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(request.UserName);
+                var user = await _userManager.FindByEmailAsync(request.LoginDto.email);
                 if (user == null)
                 {
-                    _logger.LogWarning("User with username {UserName} not found", request.UserName);
+                    _logger.LogWarning("User with username {UserName} not found", request.LoginDto.email);
                     return OperationResult<(User, string)>.Fail("Invalid username or password", nameof(LoginUserQueryHandler));
                 }
 
-                var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+                var passwordValid = await _userManager.CheckPasswordAsync(user, request.LoginDto.password);
                 if (!passwordValid)
                 {
-                    _logger.LogWarning("Invalid password for user {UserName}", request.UserName);
+                    _logger.LogWarning("Invalid password for user {UserName}", request.LoginDto.email);
                     return OperationResult<(User, string)>.Fail("Invalid username or password", nameof(LoginUserQueryHandler));
                 }
 
                 var token = _tokenHelper.GenerateToken(user);
 
-                _logger.LogInformation("User {UserName} logged in successfully", request.UserName);
+                _logger.LogInformation("User {UserName} logged in successfully", request.LoginDto.email);
 
                 return OperationResult<(User, string)>.Success((user, token));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while logging in user {UserName}", request.UserName);
+                _logger.LogError(ex, "An error occurred while logging in user {UserName}", request.LoginDto.email);
                 return OperationResult<(User, string)>.Fail("An error occurred during login", nameof(LoginUserQueryHandler));
             }
         }

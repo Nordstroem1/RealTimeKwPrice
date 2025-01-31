@@ -57,9 +57,9 @@ namespace Application.Users.Commands.CreateUser
                     Email = sanitizedEmail,       
                     PhoneNumber = sanitizedPhoneNumber, 
                     CreatedAt = request.UserDto.CreatedAt,
-                    Role = request.UserDto.Role,
+                    Role = RoleEnums.Roles.User,
                     Location = request.UserDto.Location,
-                    PriceList = request.UserDto.PriceList
+                    PriceList = new List<ElectricityPrice>()
                 };
 
                 var basePath = AppContext.BaseDirectory;

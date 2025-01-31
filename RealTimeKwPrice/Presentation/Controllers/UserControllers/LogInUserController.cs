@@ -1,4 +1,5 @@
-﻿using Application.DTO.User;
+﻿using Application.DTO.Login;
+using Application.DTO.User;
 using Application.Users.Queries.LogInUser;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ namespace API.Controllers.UserControllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginUser([FromBody] LoginUserQuery loginQuery)
+        public async Task<IActionResult> LoginUser([FromBody] LoginDto logindto)
         {
             if (!ModelState.IsValid)
             {
@@ -28,7 +29,7 @@ namespace API.Controllers.UserControllers
 
             try
             {
-                var result = await _mediator.Send(loginQuery);
+                var result = await _mediator.Send(new LoginUserQuery(logindto));
 
                 if (!result.Succeeded)
                 {
@@ -42,7 +43,7 @@ namespace API.Controllers.UserControllers
                     });
                 }
 
-                _logger.LogInformation("User {UserName} logged in successfully", loginQuery.UserName);
+                _logger.LogInformation("User {UserName} logged in successfully", logindto);
 
                 var (user, token) = result.Data;
 
@@ -61,7 +62,7 @@ namespace API.Controllers.UserControllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error during login for user {UserName}", loginQuery.UserName);
+                _logger.LogError(ex, "Unexpected error during login for user {UserName}", logindto.email);
                 return StatusCode(500, new { Message = "Internal server error", Exception = ex.Message });
             }
         }
