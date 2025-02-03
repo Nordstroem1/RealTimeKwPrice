@@ -1,4 +1,8 @@
 ﻿using Application.DataValidation.ExplicitWordList;
+using Domain.Models;
+using FakeItEasy;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace RealTimeKWhPrice.Test.DataValidationTests
 {
@@ -8,18 +12,21 @@ namespace RealTimeKWhPrice.Test.DataValidationTests
         [Trait("DataValidationTests", "CheckForBadUserNames")]
         public void CheckForBadUserNames_WithBadUserName_ShouldReturnFalse()
         {
-            //Arrange 
-            var basePath = AppContext.BaseDirectory;
-            var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
-            var checkForExplicitWord = new CheckForExplicitWord(jsonFilePath);
-            var userName = "JohnIdiotDoe";
+            var mockLogger = A.Fake<ILogger<CheckForExplicitWord>>();
 
-            //Act
+            var checkForExplicitWord = A.Fake<CheckForExplicitWord>(options =>
+                options.WithArgumentsForConstructor(() => new CheckForExplicitWord("mock/path/to/explicitWords.json", mockLogger))
+            );
+
+            A.CallTo(() => checkForExplicitWord.CheckForBadWords(A<string>._))
+                .Returns(OperationResult<bool>.Fail("Explicit word found", "ExplicitWordList"));
+
+            var userName = "JohnIdiotDoe";
             var result = checkForExplicitWord.CheckForBadWords(userName);
 
-            //Assert
             Assert.False(result.Succeeded);
             Assert.Equal("Explicit word found", result.ErrorMessage);
         }
+
     }
 }
