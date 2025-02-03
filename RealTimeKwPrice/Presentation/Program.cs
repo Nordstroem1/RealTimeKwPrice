@@ -32,7 +32,8 @@ namespace Presentation
                     name: "REALTIMEKWPRICEFE",
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins("http://localhost:3000")
+                               .AllowAnyOrigin()
                                .AllowAnyHeader()
                                .AllowAnyMethod();
                     });
@@ -44,7 +45,11 @@ namespace Presentation
             builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
 
             builder.Services.AddTransient<TokenHelper>();
-            builder.Services.AddTransient<CheckForExplicitWord>(provider => new CheckForExplicitWord("path/to/explicitWords.json"));
+            builder.Services.AddTransient<CheckForExplicitWord>(provider =>
+            {
+                var logger = provider.GetRequiredService<ILogger<CheckForExplicitWord>>(); // Get the logger
+                return new CheckForExplicitWord("path/to/explicitWords.json", logger); // Pass both parameters to the constructor
+            });
 
             var app = builder.Build();
             app.UseCors("REALTIMEKWPRICEFE");
