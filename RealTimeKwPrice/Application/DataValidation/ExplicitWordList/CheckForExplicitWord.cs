@@ -9,14 +9,13 @@ namespace Application.DataValidation.ExplicitWordList
         private readonly string _jsonFilePath;
         private readonly ILogger<CheckForExplicitWord> _logger;
 
-        // Injektera loggern via konstruktorn
         public CheckForExplicitWord(string jsonFilePath, ILogger<CheckForExplicitWord> logger)
         {
             _jsonFilePath = Path.GetFullPath(jsonFilePath);
             _logger = logger;
         }
 
-        public OperationResult<bool> CheckForBadWords(string userName)
+        public virtual OperationResult<bool> CheckForBadWords(string userName)
         {
             try
             {
@@ -34,15 +33,12 @@ namespace Application.DataValidation.ExplicitWordList
                     return OperationResult<bool>.Fail($"File not found: {_jsonFilePath}", "ExplicitWordList");
                 }
 
-                // Läs JSON-filens innehåll
                 var jsonContent = File.ReadAllText(_jsonFilePath);
 
-                // Logga innehållet av JSON-filen
                 _logger.LogInformation($"Explicit words JSON content: {jsonContent}");
 
                 var explicitWordsList = JsonConvert.DeserializeObject<List<string>>(jsonContent);
 
-                // Logga resultatet av deserialisering
                 _logger.LogInformation($"Deserialized explicit words count: {explicitWordsList?.Count ?? 0}");
 
                 if (explicitWordsList == null)
@@ -51,10 +47,8 @@ namespace Application.DataValidation.ExplicitWordList
                     return OperationResult<bool>.Fail("Deserialized data was null", "ExplicitWordList");
                 }
 
-                // Kolla om användarnamnet innehåller några förbjudna ord
                 foreach (var word in explicitWordsList)
                 {
-                    // Dela upp användarnamnet i ord och kolla för exakt matchning
                     if (userName.Split(new[] { ' ', '_', '-', '.' }, StringSplitOptions.RemoveEmptyEntries)
                         .Any(part => part.Equals(word, StringComparison.OrdinalIgnoreCase)))
                     {
@@ -67,7 +61,6 @@ namespace Application.DataValidation.ExplicitWordList
             }
             catch (Exception ex)
             {
-                // Logga om ett undantag inträffar
                 _logger.LogError(ex, "Error while reading explicit words from JSON file.");
                 throw new Exception("Error while reading explicit words from json file", ex);
             }
