@@ -8,6 +8,7 @@ using Infrastructure.Initializer;
 using Microsoft.EntityFrameworkCore;
 using Application.TokenHelper;
 using Application.DataValidation.ExplicitWordList;
+using Microsoft.OpenApi.Models;
 
 namespace Presentation
 {
@@ -15,17 +16,43 @@ namespace Presentation
     {
         public static async Task Main(string[] args)
         {
-
-
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' followed by a space and then your token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
+            });
+
+            // Lägg till infrastrukturlagret, inklusive autentisering/auktorisering
             builder.Services.AddInfrastructureLayer(builder.Configuration,
                 builder.Configuration.GetConnectionString("DefaultConnection")!);
-            
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(
@@ -39,7 +66,6 @@ namespace Presentation
                     });
             });
 
-
             // Register MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));
             builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
@@ -47,8 +73,8 @@ namespace Presentation
             builder.Services.AddTransient<TokenHelper>();
             builder.Services.AddTransient<CheckForExplicitWord>(provider =>
             {
-                var logger = provider.GetRequiredService<ILogger<CheckForExplicitWord>>(); // Get the logger
-                return new CheckForExplicitWord("path/to/explicitWords.json", logger); // Pass both parameters to the constructor
+                var logger = provider.GetRequiredService<ILogger<CheckForExplicitWord>>();
+                return new CheckForExplicitWord("path/to/explicitWords.json", logger);
             });
 
             var app = builder.Build();
@@ -69,10 +95,11 @@ namespace Presentation
 
             app.UseHttpsRedirection();
 
+            // Lägg bara till Authentication & Authorization här, eftersom det konfigureras i AddInfrastructureLayer
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
-
             app.Run();
         }
     }
