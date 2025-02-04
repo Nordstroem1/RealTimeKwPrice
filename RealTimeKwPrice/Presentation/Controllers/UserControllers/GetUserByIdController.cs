@@ -25,7 +25,6 @@ namespace API.Controllers.UserControllers
             _loggerToDatabase = loggerToDatabase;
         }
 
-        [Authorize(Policy = "User")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {

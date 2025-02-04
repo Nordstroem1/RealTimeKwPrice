@@ -25,7 +25,6 @@ namespace API.Controllers.AdminController
             _loggerToDatabase = loggerToDatabase;
         }
 
-        [Authorize(Policy = "Admin")]
         [HttpPost("change-role")]
         public async Task<IActionResult> ChangeUserRole([FromBody] ChangeUserRoleDTO changeUserRoleDTO)
         {

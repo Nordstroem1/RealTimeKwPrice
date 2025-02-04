@@ -26,7 +26,6 @@ namespace API.Controllers.AdminControllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> DeleteUserAsAdmin(Guid id)
         {
             try

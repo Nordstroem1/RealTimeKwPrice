@@ -22,7 +22,7 @@ namespace API.Controllers.UserControllers
             _loggerToDatabase = loggerToDatabase;
         }
 
-        [Authorize(Policy = "User")]
+       
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {

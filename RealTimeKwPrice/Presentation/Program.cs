@@ -49,7 +49,6 @@ namespace Presentation
                 });
             });
 
-            // Lägg till infrastrukturlagret, inklusive autentisering/auktorisering
             builder.Services.AddInfrastructureLayer(builder.Configuration,
                 builder.Configuration.GetConnectionString("DefaultConnection")!);
 
@@ -66,7 +65,6 @@ namespace Presentation
                     });
             });
 
-            // Register MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(UpdateUserCommandHandler).Assembly));
             builder.Services.AddTransient<IGenericRepository<User>, GenericRepository<User>>();
 
@@ -95,7 +93,6 @@ namespace Presentation
 
             app.UseHttpsRedirection();
 
-            // Lägg bara till Authentication & Authorization här, eftersom det konfigureras i AddInfrastructureLayer
             app.UseAuthentication();
             app.UseAuthorization();
 
