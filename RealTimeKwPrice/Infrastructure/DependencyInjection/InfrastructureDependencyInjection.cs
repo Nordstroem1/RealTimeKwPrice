@@ -35,7 +35,7 @@ namespace Infrastructure.DependencyInjection
                 .AddDefaultTokenProviders();
 
             var jwtSettings = configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["secret"];
+            var secretKey = jwtSettings["Secret"];
 
             services.AddAuthentication(options =>
             {

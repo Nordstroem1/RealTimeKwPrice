@@ -32,14 +32,12 @@ namespace Application.Users.Commands.CreateUser
             {
                 _logger.LogInformation($"Received request to create user: {JsonConvert.SerializeObject(request.UserDto)}");
 
-                // Validate and sanitize user data
                 var (isUserNameValid, sanitizedUserName) = _dataSanitizerLogic.ValidateAndSanitize(request.UserDto.UserName);
                 var (isEmailValid, sanitizedEmail) = _dataSanitizerLogic.ValidateAndSanitize(request.UserDto.Email);
                 var (isPhoneNumberValid, sanitizedPhoneNumber) = _dataSanitizerLogic.ValidateAndSanitize(request.UserDto.PhoneNumber);
 
                 _logger.LogInformation($"Sanitized UserName: {sanitizedUserName}, Email: {sanitizedEmail}, Phone: {sanitizedPhoneNumber}");
 
-                // Validation checks
                 if (!isUserNameValid)
                 {
                     _logger.LogWarning($"User creation failed: Username '{sanitizedUserName}' contains forbidden words.");
@@ -75,7 +73,6 @@ namespace Application.Users.Commands.CreateUser
                 var basePath = AppContext.BaseDirectory;
                 var jsonFilePath = Path.Combine(basePath, "..", "..", "..", "..", "Application", "DataValidation", "ExplicitWordList", "ExplicitWordsJson", "explicitWords.json");
 
-                // Pass the injected logger here
                 CheckForExplicitWord _checkForExplicitWord = new CheckForExplicitWord(jsonFilePath, _checkForExplicitWordLogger);
 
                 var checkForBadWordsResult = _checkForExplicitWord.CheckForBadWords(createdUser.UserName);
