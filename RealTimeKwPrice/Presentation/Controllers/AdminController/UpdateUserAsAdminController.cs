@@ -26,7 +26,6 @@ namespace API.Controllers.AdminControllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,SuperAdmin")]
         public async Task<IActionResult> UpdateUserAsAdmin(Guid id, [FromBody] User user)
         {
             try

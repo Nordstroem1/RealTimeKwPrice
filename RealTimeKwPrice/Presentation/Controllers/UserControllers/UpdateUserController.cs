@@ -22,7 +22,6 @@ namespace API.Controllers.UserControllers
             _logger = logger;
             _loggerToDatabase = loggerToDatabase;
         }
-        [Authorize(Policy = "User")]
         [HttpPut("{id}", Name = "UpdateUser")]
         [SwaggerOperation(Summary = "Update User", Description = "Updates an existing user by ID")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] User user)
